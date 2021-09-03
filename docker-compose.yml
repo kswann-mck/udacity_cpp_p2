@@ -1,0 +1,12 @@
+version: "3"
+services:
+  udacity_cpp_p2:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - ./:/workspace/
+    command: bash -c "/bin/bash && cd /workspace"
+
