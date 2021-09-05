@@ -13,5 +13,5 @@ using namespace std::chrono; // nanoseconds, system_clock, seconds
 
 // TODO: Return the aggregate CPU utilization
 float Processor::Utilization() {
-    return 100*float(LinuxParser::ActiveJiffies())/float(LinuxParser::Jiffies());
+    return float(LinuxParser::ActiveJiffies())/float(LinuxParser::Jiffies());
 }
