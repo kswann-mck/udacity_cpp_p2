@@ -23,26 +23,25 @@ Processor& System::Cpu() {
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
     vector<int> current_pids = LinuxParser::Pids();
+    vector<Process> updated_processes;
     
-    // add new processes not already in list
+    // create the list of updated processes
     for (int pid : current_pids) {
         bool in_list = false;
-        for (Process p : processes_) {
+        for (Process p : updated_processes) {
             if (p.Pid() == pid) {
                 in_list = true;
             }
         }
         if (!in_list) {
-            processes_.push_back(Process(pid));
+            updated_processes.push_back(Process(pid));
         }
     }
 
-    // remove processes that don't exist anymore
-    for (int i = 0; i < processes_.size(); i++) {
-        if (std::find(current_pids.begin(), current_pids.end(), processes_[i].Pid()) != current_pids.end()) {
-            processes_.erase(processes_.begin()+i);
-        }
-    }
+    // sort the processes by the amount of ram used in descending order
+    std::sort(updated_processes.begin(), updated_processes.end());
+    std::reverse(updated_processes.begin(), updated_processes.end());
+    processes_ = updated_processes;
 
     return processes_; 
 }

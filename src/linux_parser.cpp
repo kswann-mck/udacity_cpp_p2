@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cmath>
 #include "linux_parser.h"
 
 using std::stof;
@@ -74,9 +75,9 @@ float LinuxParser::MemoryUtilization() {
   string kb;
   string str_memfree;
   string str_memtotal;
-  float memtotal = 1.0;
-  float memfree = 1.0;
-  float utilization = 0.0;
+  float memtotal;
+  float memfree;
+  float utilization;
   std::ifstream filestream(kProcDirectory+kMeminfoFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
@@ -255,7 +256,7 @@ string LinuxParser::Ram(int pid) {
       }
     }
   }
-  return memory_used;
+  return std::to_string(std::stof(memory_used)/1000.0); // convert to megabytes
 }
 
 // TODO: Read and return the user ID associated with a process
