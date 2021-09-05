@@ -8,6 +8,7 @@
 #include "process.h"
 #include "processor.h"
 #include "system.h"
+#include "linux_parser.h"
 
 using std::set;
 using std::size_t;
@@ -15,10 +16,36 @@ using std::string;
 using std::vector;
 
 // TODO: Return the system's CPU
-Processor& System::Cpu() { return cpu_; }
+Processor& System::Cpu() {
+    return cpu_; 
+}
 
 // TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+vector<Process>& System::Processes() {
+    vector<int> current_pids = LinuxParser::Pids();
+    
+    // add new processes not already in list
+    for (int pid : current_pids) {
+        bool in_list = false;
+        for (Process p : processes_) {
+            if (p.Pid() == pid) {
+                in_list = true;
+            }
+        }
+        if (!in_list) {
+            processes_.push_back(Process(pid));
+        }
+    }
+
+    // remove processes that don't exist anymore
+    for (int i = 0; i < processes_.size(); i++) {
+        if (std::find(current_pids.begin(), current_pids.end(), processes_[i].Pid()) != current_pids.end()) {
+            processes_.erase(processes_.begin()+i);
+        }
+    }
+
+    return processes_; 
+}
 
 // TODO: Return the system's kernel identifier (string)
 std::string System::Kernel() { return LinuxParser::Kernel(); }
