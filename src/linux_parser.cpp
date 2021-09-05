@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include "linux_parser.h"
+#include "format.h"
 
 using std::stof;
 using std::string;
@@ -244,19 +245,21 @@ string LinuxParser::Ram(int pid) {
   string line;
   string key;
   string value;
-  string memory_used;
+  string memory_used_str;
+  float memory_used;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while(std::getline(filestream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
         if (key == "VmSize:") {
-          memory_used = value;
+          memory_used_str = value;
         }
       }
     }
   }
-  return std::to_string(std::stof(memory_used)/1000.0); // convert to megabytes
+  memory_used = std::stof(memory_used_str)/1000; // convert to megabytes
+  return Format::FloatToStringWithTwoDecimals(memory_used);
 }
 
 // TODO: Read and return the user ID associated with a process

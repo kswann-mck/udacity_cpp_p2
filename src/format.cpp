@@ -1,5 +1,5 @@
 #include <string>
-
+#include <cmath>
 #include "format.h"
 
 using std::string;
@@ -36,4 +36,13 @@ string Format::ElapsedTime(long seconds) {
     }
 
     return hours_str + ":" + minutes_str + ":" + seconds_str;
+}
+
+
+string Format::FloatToStringWithTwoDecimals(float f) {
+    float pow_10 = std::pow(10.0f, (float)2);
+    f = std::round(f * pow_10) / pow_10;
+    string output = std::to_string(f);
+    output.erase (output.find_last_not_of('0') + 1, std::string::npos);
+    return output;
 }
