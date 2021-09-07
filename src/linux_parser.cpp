@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <assert.h>
 #include "linux_parser.h"
 #include "format.h"
 
@@ -75,8 +76,8 @@ float LinuxParser::MemoryUtilization() {
   string kb;
   string str_memfree;
   string str_memtotal;
-  float memtotal;
-  float memfree;
+  float memtotal = 0.0;
+  float memfree = 0.0;
   float utilization;
   std::ifstream filestream(kProcDirectory+kMeminfoFilename);
   if (filestream.is_open()) {
@@ -97,13 +98,17 @@ float LinuxParser::MemoryUtilization() {
       }
     }
   }
+  
+  assert(memtotal != 0.0);
+  assert(memfree != 0.0);
+
   utilization = (memtotal-memfree)/memtotal;
   return utilization;
 }
 
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() {
-  string uptime_str;
+  string uptime_str = "null";
   string uptime_str2;
   string line;
   std::ifstream stream(kProcDirectory + kUptimeFilename);
@@ -112,6 +117,7 @@ long LinuxParser::UpTime() {
     std::istringstream linestream(line);
     linestream >> uptime_str >> uptime_str2;
   }
+  assert(uptime_str != "null");
   return long(std::stof(uptime_str));
 }
 
@@ -244,8 +250,8 @@ string LinuxParser::Ram(int pid) {
   string line;
   string key;
   string value;
-  string memory_used_str;
-  float memory_used;
+  string memory_used_str = "null";
+  float memory_used = 0.0;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while(std::getline(filestream, line)) {
@@ -257,6 +263,8 @@ string LinuxParser::Ram(int pid) {
       }
     }
   }
+
+  assert(memory_used_str != "null");
   memory_used = std::stof(memory_used_str)/1000; // convert to megabytes
   return Format::FloatToStringWithTwoDecimals(memory_used);
 }
