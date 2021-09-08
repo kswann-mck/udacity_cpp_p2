@@ -74,10 +74,8 @@ float LinuxParser::MemoryUtilization() {
   string key;
   string value;
   string kb;
-  string str_memfree;
-  string str_memtotal;
-  float memtotal = 0.0;
-  float memfree = 0.0;
+  float memtotal;
+  float memfree;
   float utilization;
   std::ifstream filestream(kProcDirectory+kMeminfoFilename);
   if (filestream.is_open()) {
@@ -98,9 +96,6 @@ float LinuxParser::MemoryUtilization() {
       }
     }
   }
-  
-  assert(memtotal != 0.0);
-  assert(memfree != 0.0);
 
   utilization = (memtotal-memfree)/memtotal;
   return utilization;
@@ -117,7 +112,7 @@ long LinuxParser::UpTime() {
     std::istringstream linestream(line);
     linestream >> uptime_str >> uptime_str2;
   }
-  assert(uptime_str != "null");
+
   return long(std::stof(uptime_str));
 }
 
@@ -153,20 +148,20 @@ long LinuxParser::ActiveJiffies(int pid) {
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
     vector<string> cpu_values = LinuxParser::CpuUtilization();
-    long int user = std::stol(cpu_values[0]);
-    long int nice = std::stol(cpu_values[1]);
-    long int system = std::stol(cpu_values[2]);
-    long int irq = std::stol(cpu_values[5]);
-    long int softirq = std::stol(cpu_values[6]);
-    long int steal = std::stol(cpu_values[7]);
+    long int user = std::stol(cpu_values[kUser_]);
+    long int nice = std::stol(cpu_values[kNice_]);
+    long int system = std::stol(cpu_values[kSystem_]);
+    long int irq = std::stol(cpu_values[kIRQ_]);
+    long int softirq = std::stol(cpu_values[kSoftIRQ_]);
+    long int steal = std::stol(cpu_values[kSteal_]);
     return user + nice + system + irq + softirq + steal;
 }
 
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() {
     vector<string> cpu_values = LinuxParser::CpuUtilization();
-    long int idle = std::stol(cpu_values[3]);
-    long int iowait = std::stol(cpu_values[4]);
+    long int idle = std::stol(cpu_values[kIdle_]);
+    long int iowait = std::stol(cpu_values[kIOwait_]);
     return idle + iowait;
 }
 
@@ -250,22 +245,20 @@ string LinuxParser::Ram(int pid) {
   string line;
   string key;
   string value;
-  string memory_used_str = "null";
-  float memory_used = 0.0;
+  float memory_used;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while(std::getline(filestream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
         if (key == "VmSize:") {
-          memory_used_str = value;
+          memory_used = std::stof(value);
         }
       }
     }
   }
 
-  assert(memory_used_str != "null");
-  memory_used = std::stof(memory_used_str)/1000; // convert to megabytes
+  memory_used = memory_used/1000; // convert to megabytes
   return Format::FloatToStringWithTwoDecimals(memory_used);
 }
 
