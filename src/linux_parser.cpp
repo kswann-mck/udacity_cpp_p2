@@ -74,8 +74,8 @@ float LinuxParser::MemoryUtilization() {
   string key;
   string value;
   string kb;
-  float memtotal;
-  float memfree;
+  float memtotal = 0.0f;
+  float memfree = 0.0f;
   float utilization;
   std::ifstream filestream(kProcDirectory+kMeminfoFilename);
   if (filestream.is_open()) {
@@ -97,13 +97,18 @@ float LinuxParser::MemoryUtilization() {
     }
   }
 
+  // edge case where divide by zero would give nan
+  if (memtotal == 0.0) {
+    return 0.0;
+  }
+
   utilization = (memtotal-memfree)/memtotal;
   return utilization;
 }
 
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() {
-  string uptime_str = "null";
+  string uptime_str;
   string uptime_str2;
   string line;
   std::ifstream stream(kProcDirectory + kUptimeFilename);
@@ -111,6 +116,11 @@ long LinuxParser::UpTime() {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> uptime_str >> uptime_str2;
+  }
+
+  // edge case if value was not found
+  if (uptime_str.empty()) {
+    return long(0);
   }
 
   return long(std::stof(uptime_str));
@@ -188,7 +198,7 @@ int LinuxParser::TotalProcesses() {
   string line;
   string key;
   string value;
-  int total_processes;
+  int total_processes = 0;
   std::ifstream filestream(kProcDirectory+kStatFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
@@ -200,6 +210,7 @@ int LinuxParser::TotalProcesses() {
       }
     }
   }
+
   return total_processes;
 }
 
@@ -208,7 +219,7 @@ int LinuxParser::RunningProcesses() {
   string line;
   string key;
   string value;
-  int running_processes;
+  int running_processes = 0;
   std::ifstream filestream(kProcDirectory+kStatFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
@@ -245,7 +256,7 @@ string LinuxParser::Ram(int pid) {
   string line;
   string key;
   string value;
-  float memory_used;
+  float memory_used = 0.0f;
   std::ifstream filestream(kProcDirectory + std::to_string(pid) + kStatusFilename);
   if (filestream.is_open()) {
     while(std::getline(filestream, line)) {
@@ -256,6 +267,11 @@ string LinuxParser::Ram(int pid) {
         }
       }
     }
+  }
+
+  // if value was not found
+  if (memory_used == 0.0f) {
+    return "0.00";
   }
 
   memory_used = memory_used/1000; // convert to megabytes
