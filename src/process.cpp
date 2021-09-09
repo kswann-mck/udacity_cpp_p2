@@ -23,7 +23,7 @@ int Process::Pid() { return pid_;}
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() {
     long active_time = LinuxParser::ActiveJiffies(pid_)/sysconf(_SC_CLK_TCK);
-    return std::stof(Format::FloatToStringWithTwoDecimals(100*float(active_time)/float(LinuxParser::UpTime())));
+    return std::stof(Format::FloatToStringWithTwoDecimals(float(active_time)/float(LinuxParser::UpTime())));
 }
 
 // TODO: Return the command that generated this process
